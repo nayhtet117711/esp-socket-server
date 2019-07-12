@@ -4,7 +4,7 @@ const io = require("socket.io")(http);
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const tempdata = { data: 0 };
+const data = { data: [] };
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/socket-temp", (req, res) => {
-  res.json(tempdata)
+  res.json(data)
 })
 
 app.post("/socket-light", (req, res) => {
@@ -31,9 +31,10 @@ io.on("connection", socket => {
   });
   socket.emit("GIVE_ME_DATA", "Hello ESP8226");
 
-  socket.on("HERE_IS_DATA", data => {
-    // console.log(data)
-    tempdata.data = data
+  socket.on("HERE_IS_DATA", d => { 
+    data.data = Object.keys(d).map(v => {
+      return { pin: v, value: d[v] }
+    });
   })
 
 });
